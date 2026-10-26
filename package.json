@@ -1,0 +1,72 @@
+{
+  "name": "@bazulu1/n8n-nodes-xurrent",
+  "version": "0.1.0",
+  "description": "n8n nodes for Xurrent (formerly 4me) service management: requests, problems, workflows, tasks and approvals, configuration items, people, notes, attachments, any other API collection and a webhook trigger",
+  "license": "MIT",
+  "homepage": "https://github.com/bazn/n8n-nodes-xurrent#readme",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n",
+    "xurrent",
+    "4me",
+    "itsm",
+    "esm",
+    "service-desk",
+    "servicedesk"
+  ],
+  "author": {
+    "name": "Dominik Vogt",
+    "email": "vogt.dom@gmail.com"
+  },
+  "scripts": {
+    "build": "n8n-node build",
+    "build:watch": "tsc --watch",
+    "dev": "n8n-node dev",
+    "lint": "n8n-node lint",
+    "lint:fix": "n8n-node lint --fix",
+    "release": "n8n-node release",
+    "prepublishOnly": "npm run lint && npm test",
+    "test": "n8n-node build && node --test test/unit/*.test.cjs",
+    "test:live": "n8n-node build && node --env-file-if-exists=.env test/live/run.cjs"
+  },
+  "files": [
+    "dist",
+    "!dist/tsconfig.tsbuildinfo",
+    "!dist/**/*.map"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "strict": true,
+    "credentials": [
+      "dist/credentials/XurrentApi.credentials.js",
+      "dist/credentials/XurrentOAuthApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/Xurrent/Xurrent.node.js",
+      "dist/nodes/XurrentTrigger/XurrentTrigger.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@n8n/node-cli": "*",
+    "eslint": "9.32.0",
+    "prettier": "3.6.2",
+    "release-it": "^21.1.0",
+    "typescript": "5.9.2"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bazn/n8n-nodes-xurrent.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bazn/n8n-nodes-xurrent/issues"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

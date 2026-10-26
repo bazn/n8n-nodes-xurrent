@@ -1,0 +1,185 @@
+import type { INodeProperties } from 'n8n-workflow';
+
+import { listOptionFields, op, returnAllFields } from './shared';
+
+const showRecord = (operation: string[]) => ({ show: { resource: ['record'], operation } });
+const showAttachment = (operation: string[]) => ({ show: { resource: ['attachment'], operation } });
+
+export const recordDescription: INodeProperties[] = [
+	{
+		displayName: 'Operation',
+		name: 'operation',
+		type: 'options',
+		noDataExpression: true,
+		displayOptions: { show: { resource: ['record'] } },
+		options: [
+			op('Create', 'create', 'Create a record in any collection'),
+			op('Custom API Call', 'request', 'Send any request to the Xurrent REST API'),
+			op('Delete', 'delete', 'Delete a record or remove it from a collection'),
+			op('Get', 'get', 'Get a record of any collection'),
+			op('Get Many', 'getAll', 'Get many records of any collection'),
+			op('Update', 'update', 'Update a record in any collection'),
+		],
+		default: 'getAll',
+	},
+	{
+		displayName: 'Collection',
+		name: 'collection',
+		type: 'resourceLocator',
+		default: { mode: 'list', value: 'teams' },
+		required: true,
+		description:
+			'API collection, e.g. teams, organizations or a nested one such as requests/123/cis. See the <a href="https://developer.xurrent.com/v1/">API reference</a>.',
+		displayOptions: showRecord(['create', 'delete', 'get', 'getAll', 'update']),
+		modes: [
+			{
+				displayName: 'From List',
+				name: 'list',
+				type: 'list',
+				typeOptions: { searchListMethod: 'searchCollections', searchable: true },
+			},
+			{ displayName: 'Path', name: 'path', type: 'string', placeholder: 'requests/123/notes' },
+		],
+	},
+	{
+		displayName: 'Record ID',
+		name: 'recordPathId',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: '12345',
+		displayOptions: showRecord(['delete', 'get', 'update']),
+	},
+	{
+		displayName: 'Body (JSON)',
+		name: 'body',
+		type: 'json',
+		default: '{\n  "name": ""\n}',
+		required: true,
+		description:
+			'Fields of the record as documented in the API reference; references are set with the suffix "_id", e.g. {"team_id": 12}',
+		displayOptions: showRecord(['create', 'update']),
+	},
+	...returnAllFields(showRecord(['getAll'])),
+	{
+		displayName: 'Options',
+		name: 'options',
+		type: 'collection',
+		placeholder: 'Add Option',
+		default: {},
+		displayOptions: showRecord(['getAll']),
+		options: listOptionFields,
+	},
+	{
+		displayName: 'Options',
+		name: 'getOptions',
+		type: 'collection',
+		placeholder: 'Add Option',
+		default: {},
+		displayOptions: showRecord(['get']),
+		options: [listOptionFields[1]],
+	},
+	{
+		displayName: 'Method',
+		name: 'method',
+		type: 'options',
+		default: 'GET',
+		displayOptions: showRecord(['request']),
+		options: [
+			{ name: 'DELETE', value: 'DELETE' },
+			{ name: 'GET', value: 'GET' },
+			{ name: 'PATCH', value: 'PATCH' },
+			{ name: 'POST', value: 'POST' },
+			{ name: 'PUT', value: 'PUT' },
+		],
+	},
+	{
+		displayName: 'Path',
+		name: 'path',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: 'requests/123/watches',
+		description: 'Path relative to the API base URL (…/v1/)',
+		displayOptions: showRecord(['request']),
+	},
+	{
+		displayName: 'Query Parameters (JSON)',
+		name: 'query',
+		type: 'json',
+		default: '{}',
+		displayOptions: showRecord(['request']),
+	},
+	{
+		displayName: 'Body (JSON)',
+		name: 'requestBody',
+		type: 'json',
+		default: '{}',
+		description: 'Request body; ignored for GET and DELETE',
+		displayOptions: showRecord(['request']),
+	},
+	{
+		displayName: 'Read All Pages',
+		name: 'readAllPages',
+		type: 'boolean',
+		default: false,
+		description: 'Whether to follow the pagination links of a GET collection request and return every record',
+		displayOptions: showRecord(['request']),
+	},
+];
+
+export const attachmentDescription: INodeProperties[] = [
+	{
+		displayName: 'Operation',
+		name: 'operation',
+		type: 'options',
+		noDataExpression: true,
+		displayOptions: { show: { resource: ['attachment'] } },
+		options: [
+			op('Download', 'download', 'Download an attachment'),
+			op(
+				'Upload',
+				'upload',
+				'Upload a file to the attachment storage',
+				'Upload a file to the Xurrent attachment storage and return its key, to be used in notes or attachment fields',
+			),
+		],
+		default: 'upload',
+	},
+	{
+		displayName: 'Input Binary Field',
+		name: 'binaryPropertyName',
+		type: 'string',
+		default: 'data',
+		required: true,
+		hint: 'The name of the input binary field containing the file to be uploaded',
+		displayOptions: showAttachment(['upload']),
+	},
+	{
+		displayName: 'Attachment URL',
+		name: 'attachmentUrl',
+		type: 'string',
+		default: '',
+		required: true,
+		placeholder: '={{ $json.attachments[0].uri }}',
+		description: 'The "uri" of an attachment, e.g. from the attachments of a note or record',
+		displayOptions: showAttachment(['download']),
+	},
+	{
+		displayName: 'Put Output File in Field',
+		name: 'outputBinaryPropertyName',
+		type: 'string',
+		default: 'data',
+		required: true,
+		hint: 'The name of the output binary field to put the file in',
+		displayOptions: showAttachment(['download']),
+	},
+	{
+		displayName: 'File Name',
+		name: 'fileName',
+		type: 'string',
+		default: '',
+		description: 'Name of the downloaded file; taken from the URL when empty',
+		displayOptions: showAttachment(['download']),
+	},
+];

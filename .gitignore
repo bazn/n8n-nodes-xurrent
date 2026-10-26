@@ -1,0 +1,7 @@
+dist
+node_modules
+
+# local MCP config (contains API token)
+.mcp.json
+*.tgz
+.env
