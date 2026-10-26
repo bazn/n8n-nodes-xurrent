@@ -4,6 +4,13 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [semantic versioning](https://semver.org/).
 
+## 0.1.1
+
+### Changed
+
+- The node and credential icons now use the official Xurrent brand mark.
+- README: added a disclaimer that this is an unofficial community node.
+
 ## 0.1.0
 
 ### Added

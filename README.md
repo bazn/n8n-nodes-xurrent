@@ -30,7 +30,7 @@
 - [Xurrent Trigger](#xurrent-trigger)
 - [Good to know](#good-to-know)
 - [Development](#development)
-- [Changelog](CHANGELOG.md) · [License](#license)
+- [Changelog](CHANGELOG.md) · [License](#license) · [Disclaimer](#disclaimer)
 
 ## Installation
 
@@ -117,3 +117,7 @@ The implementation follows the official API reference at [developer.xurrent.com]
 ## License
 
 [MIT](LICENSE.md)
+
+## Disclaimer
+
+This is an unofficial community node. It is not developed, endorsed, sponsored or supported by Xurrent, Inc. "Xurrent" and the Xurrent logo are trademarks of Xurrent, Inc. and are used here only to identify the service the node connects to.
