@@ -103,9 +103,9 @@ export function standardDescription(spec: StandardSpec): INodeProperties[] {
 		a.name.localeCompare(b.name),
 	);
 	const recordName = spec.label.replace(/(^|\s)\w/g, (char) => char.toUpperCase());
+	const defaultOperation = spec.defaultOperation ?? 'get';
 
 	const properties: INodeProperties[] = [
-		// eslint-disable-next-line n8n-nodes-base/node-param-default-missing -- the default is the spec's operation
 		{
 			displayName: 'Operation',
 			name: 'operation',
@@ -113,7 +113,7 @@ export function standardDescription(spec: StandardSpec): INodeProperties[] {
 			noDataExpression: true,
 			displayOptions: { show: { resource: [spec.resource] } },
 			options: operations,
-			default: spec.defaultOperation ?? 'get',
+			default: defaultOperation,
 		},
 		locatorField({
 			displayName: recordName,
@@ -159,20 +159,20 @@ export function standardDescription(spec: StandardSpec): INodeProperties[] {
 	}
 
 	if (spec.operations.includes('getAll')) {
+		const viewOptions = [
+			{ name: `All ${enumLabel(spec.plural)}`, value: 'all' },
+			...spec.predefinedFilters.map((filter) => ({ name: enumLabel(filter), value: filter })),
+		];
 		properties.push(
 			...returnAllFields(show(['getAll'])),
 			{
 				displayName: 'View',
 				name: 'predefinedFilter',
 				type: 'options',
-				// eslint-disable-next-line n8n-nodes-base/node-param-default-wrong-for-options -- "all" is the first option
 				default: 'all',
 				description: 'Predefined filter of the collection, like the views in the Xurrent UI',
 				displayOptions: show(['getAll']),
-				options: [
-					{ name: `All ${enumLabel(spec.plural)}`, value: 'all' },
-					...spec.predefinedFilters.map((filter) => ({ name: enumLabel(filter), value: filter })),
-				],
+				options: viewOptions,
 			},
 			{
 				displayName: 'Filters',

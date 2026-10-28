@@ -128,9 +128,8 @@ export const customFieldsField: INodeProperties = {
 	name: 'customFields',
 	type: 'json',
 	default: '[]',
-	// eslint-disable-next-line n8n-nodes-base/node-param-description-miscased-id -- "id" is the literal JSON key
 	description:
-		'Custom fields of the UI extension, as [{"id": "field_id", "value": "…"}] or {"field_id": "value"}',
+		'Custom fields of the UI extension, as {"field_id": "value"} or in the custom_fields array format of the API',
 };
 
 export const extraFieldsField: INodeProperties = {

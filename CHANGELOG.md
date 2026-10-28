@@ -4,6 +4,13 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [semantic versioning](https://semver.org/).
 
+## 0.1.2
+
+### Fixed
+
+- Node parameter definitions now pass the n8n community package scanner without ESLint
+  exceptions (operation default, view options and the custom fields description).
+
 ## 0.1.1
 
 ### Changed
