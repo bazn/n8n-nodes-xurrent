@@ -1,6 +1,6 @@
 {
   "name": "@bazulu1/n8n-nodes-xurrent",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "n8n nodes for Xurrent (formerly 4me) service management: requests, problems, workflows, tasks and approvals, configuration items, people, notes, attachments, any other API collection and a webhook trigger",
   "license": "MIT",
   "homepage": "https://github.com/bazn/n8n-nodes-xurrent#readme",
