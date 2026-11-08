@@ -194,21 +194,48 @@ async function api(method, endpoint, qs) {
 		await step('request addNote (internal, with attachment)', async () => {
 			const [note] = await run({
 				resource: 'request', operation: 'addNote', recordId, noteText: 'Internal note with attachment',
-				noteOptions: { internal: true, attachmentKeys: keys?.key ?? '' },
+				noteOptions: { internal: true, attachmentKeys: keys ?? '' },
 			});
 			assert(note.id, short(note));
+		});
+		await step('request update with internal note attachment', async () => {
+			const [uploaded] = await run(
+				{ resource: 'attachment', operation: 'upload', binaryPropertyName: 'data' },
+				{ binary: { data: { data: Buffer.from('attached on update').toString('base64'), fileName: 'n8n-update.txt', mimeType: 'text/plain' } } },
+			);
+			const [updated] = await run({
+				resource: 'request', operation: 'update', recordId,
+				updateFields: { internalNote: 'Internal note with attachment via update', internalNoteAttachments: uploaded },
+			});
+			assert(updated.id, short(updated));
+		});
+		await step('attachment upload rejects extensions the account does not allow', async () => {
+			try {
+				await run(
+					{ resource: 'attachment', operation: 'upload', binaryPropertyName: 'data' },
+					{ binary: { data: { data: Buffer.from('<p>x</p>').toString('base64'), fileName: 'n8n-test.blocked', mimeType: 'text/html' } } },
+				);
+			} catch (error) {
+				assert(/does not accept files/.test(error.message), error.message);
+				console.log(`     ${error.message}`);
+				return;
+			}
+			throw new Error('upload of a blocked extension succeeded');
 		});
 		const notes = await step('request getNotes (all / internal / public)', async () => {
 			const all = await run({ resource: 'request', operation: 'getNotes', recordId, returnAll: true, noteVisibility: 'all' });
 			const internal = await run({ resource: 'request', operation: 'getNotes', recordId, returnAll: true, noteVisibility: 'internal' });
 			const pub = await run({ resource: 'request', operation: 'getNotes', recordId, returnAll: true, noteVisibility: 'public' });
 			console.log(`     all ${all.length}, internal ${internal.length}, public ${pub.length}`);
-			assert(all.length >= 3 && internal.length >= 1 && pub.length >= 2, 'unexpected note counts');
+			assert(all.length >= 4 && internal.length >= 2 && pub.length >= 2, 'unexpected note counts');
 			return all;
 		});
 		await step('attachment download from note', async () => {
 			const withAttachment = (notes ?? []).find((note) => (note.attachments ?? []).length);
 			assert(withAttachment, 'no note with attachment');
+			assert(withAttachment.attachments[0].size > 0, `attachment stored with size ${withAttachment.attachments[0].size}`);
+			const viaUpdate = (notes ?? []).find((note) => note.text === 'Internal note with attachment via update');
+			assert(viaUpdate?.attachments?.length, 'no attachment on the note added via update');
 			const [item] = await run(
 				{ resource: 'attachment', operation: 'download', attachmentUrl: withAttachment.attachments[0].uri, outputBinaryPropertyName: 'data', fileName: '' },
 				{ raw: true },

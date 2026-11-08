@@ -9,7 +9,7 @@ const g = require(path.join(dist, 'Xurrent', 'GenericFunctions.js'));
 const constants = require(path.join(dist, 'Xurrent', 'constants.js'));
 const { RUNTIMES, CREATE_FIELDS } = require(path.join(dist, 'Xurrent', 'actions', 'resources.js'));
 const { buildNoteBody } = require(path.join(dist, 'Xurrent', 'actions', 'standard.js'));
-const { extractUploadKey } = require(path.join(dist, 'Xurrent', 'actions', 'other.js'));
+const { extractUploadKey, fileExtension } = require(path.join(dist, 'Xurrent', 'actions', 'other.js'));
 const { Xurrent } = require(path.join(dist, 'Xurrent', 'Xurrent.node.js'));
 const { XurrentTrigger, decodeJwt, isJwt } = require(path.join(dist, 'XurrentTrigger', 'XurrentTrigger.node.js'));
 
@@ -138,14 +138,54 @@ test('customQuery, listOptionsQuery and collectionPath', () => {
 	assert.equal(g.collectionPath('requests'), 'requests');
 });
 
-test('buildNoteBody adds flags and attachment keys only when set', () => {
-	assert.deepEqual(buildNoteBody('Hello', {}), { text: 'Hello' });
-	assert.deepEqual(buildNoteBody('Hi', { internal: true, suppressNotifications: true, attachmentKeys: 'a/1.txt, b/2.png' }), {
-		text: 'Hi',
-		internal: true,
-		suppress_note_added_notifications: true,
-		attachments: [{ key: 'a/1.txt' }, { key: 'b/2.png' }],
+test('buildNoteBody adds flags and attachments only when set', () => {
+	assert.deepEqual(buildNoteBody.call(fakeExecute, 'Hello', {}, 0), { text: 'Hello' });
+	assert.deepEqual(
+		buildNoteBody.call(fakeExecute, 'Hi', { internal: true, suppressNotifications: true, attachmentKeys: 'a/1.txt, b/2.png' }, 0),
+		{
+			text: 'Hi',
+			internal: true,
+			suppress_note_added_notifications: true,
+			attachments: [{ key: 'a/1.txt' }, { key: 'b/2.png' }],
+		},
+	);
+});
+
+test('parseAttachments accepts upload output, lists, JSON and keys', () => {
+	const parse = (value) => g.parseAttachments.call(fakeExecute, value, 0);
+	const upload = { key: 'a/1.pdf', filesize: 19, fileName: '1.pdf', mimeType: 'application/pdf', provider: 's3' };
+	assert.deepEqual(parse(''), []);
+	assert.deepEqual(parse(undefined), []);
+	assert.deepEqual(parse(upload), [{ key: 'a/1.pdf', filesize: 19 }]);
+	assert.deepEqual(parse([upload, { key: 'b/2.png', size: 5, inline: true }]), [
+		{ key: 'a/1.pdf', filesize: 19 },
+		{ key: 'b/2.png', filesize: 5, inline: true },
+	]);
+	assert.deepEqual(parse(JSON.stringify(upload)), [{ key: 'a/1.pdf', filesize: 19 }]);
+	assert.deepEqual(parse('[{"key":"c/3.txt","filesize":"7"}]'), [{ key: 'c/3.txt', filesize: 7 }]);
+	assert.deepEqual(parse(' a/1.txt ,b/2.txt'), [{ key: 'a/1.txt' }, { key: 'b/2.txt' }]);
+	assert.throws(() => parse('{not json'), /invalid JSON/);
+	assert.throws(() => parse({ name: 'no key' }), /must be the output of Attachment/);
+});
+
+test('buildBody sends attachment fields as note_attachments', () => {
+	const map = { noteAttachments: { api: 'note_attachments', kind: 'attachments' } };
+	assert.deepEqual(g.buildBody.call(fakeExecute, map, { noteAttachments: { key: 'k/x.txt', filesize: 3 } }, 0), {
+		note_attachments: [{ key: 'k/x.txt', filesize: 3 }],
 	});
+	assert.deepEqual(g.buildBody.call(fakeExecute, map, { noteAttachments: '' }, 0), {});
+	for (const resource of ['request', 'problem', 'workflow', 'task']) {
+		assert.equal(RUNTIMES[resource].fieldMap.noteAttachments.api, 'note_attachments', resource);
+	}
+	assert.equal(RUNTIMES.request.fieldMap.internalNoteAttachments.api, 'internal_note_attachments');
+});
+
+test('fileExtension returns the lower-case extension', () => {
+	assert.equal(fileExtension('Report.HTML'), 'html');
+	assert.equal(fileExtension('archive.tar.gz'), 'gz');
+	assert.equal(fileExtension('README'), '');
+	assert.equal(fileExtension('.env'), '');
+	assert.equal(fileExtension('trailing.'), '');
 });
 
 test('extractUploadKey reads S3 XML, local JSON and the policy key fallback', () => {

@@ -8,6 +8,7 @@ import {
 	REQUEST_STATUSES,
 } from '../constants';
 import {
+	attachmentsField,
 	customFieldsField,
 	dateFilters,
 	enumField,
@@ -35,6 +36,8 @@ const dataFields: INodeProperties[] = [
 		'Required when the status is set to Completed',
 	),
 	customFieldsField,
+	attachmentsField('Internal Note Attachments', 'internalNoteAttachments', 'internal note'),
+	attachmentsField('Note Attachments', 'noteAttachments', 'note'),
 	{
 		displayName: 'Desired Completion',
 		name: 'desiredCompletionAt',

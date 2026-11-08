@@ -132,6 +132,18 @@ export const customFieldsField: INodeProperties = {
 		'Custom fields of the UI extension, as {"field_id": "value"} or in the custom_fields array format of the API',
 };
 
+/** Uploaded files for a note field; the value is converted with parseAttachments. */
+export function attachmentsField(displayName: string, name: string, noteLabel: string): INodeProperties {
+	return {
+		displayName,
+		name,
+		type: 'string',
+		default: '',
+		placeholder: '={{ $json }}',
+		description: `Files for the ${noteLabel}: the output of Attachment → Upload (one item or a list), or comma-separated attachment keys. Only file extensions allowed in the Xurrent account are kept.`,
+	};
+}
+
 export const extraFieldsField: INodeProperties = {
 	displayName: 'Extra Fields (JSON)',
 	name: 'extraFields',

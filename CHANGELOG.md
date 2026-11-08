@@ -4,6 +4,21 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [semantic versioning](https://semver.org/).
 
+## 0.1.3
+
+### Added
+
+- *Note Attachments* on create and update of requests, problems, workflows and tasks, and
+  *Internal Note Attachments* on requests.
+
+### Fixed
+
+- Attachments are sent with their file size, so Xurrent no longer stores them as 0 bytes. The
+  *Attachments* option of *Add Note* (formerly *Attachment Keys*) takes the output of
+  *Attachment → Upload* directly; plain keys keep working.
+- *Attachment → Upload* fails with a clear error when the file extension is not allowed in the
+  Xurrent account. Xurrent used to drop such attachments silently.
+
 ## 0.1.2
 
 ### Fixed

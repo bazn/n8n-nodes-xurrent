@@ -1,7 +1,7 @@
 import type { INodeProperties, INodePropertyOptions } from 'n8n-workflow';
 
 import { enumLabel } from '../constants';
-import { listOptionFields, locatorField, op, returnAllFields, sortByDisplayName } from './shared';
+import { attachmentsField, listOptionFields, locatorField, op, returnAllFields, sortByDisplayName } from './shared';
 
 /** Describes a record resource that follows the common REST pattern of the Xurrent API. */
 export interface StandardSpec {
@@ -69,14 +69,8 @@ export function noteFields(show: Record<string, string[]>): INodeProperties[] {
 			default: {},
 			displayOptions: { show },
 			options: [
-				{
-					displayName: 'Attachment Keys',
-					name: 'attachmentKeys',
-					type: 'string',
-					default: '',
-					placeholder: '={{ $json.key }}',
-					description: 'Comma-separated storage keys of files uploaded with Attachment → Upload',
-				},
+				// keeps the name attachmentKeys so existing workflows that pass keys keep working
+				attachmentsField('Attachments', 'attachmentKeys', 'note'),
 				{
 					displayName: 'Internal',
 					name: 'internal',

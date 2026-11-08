@@ -1,12 +1,13 @@
 import type { INodeProperties } from 'n8n-workflow';
 
 import { WORKFLOW_CATEGORIES, WORKFLOW_COMPLETION_REASONS, WORKFLOW_JUSTIFICATIONS, WORKFLOW_STATUSES } from '../constants';
-import { customFieldsField, dateFilters, enumField, enumListFilter, extraFieldsField, locatorField, op, returnAllFields } from './shared';
+import { attachmentsField, customFieldsField, dateFilters, enumField, enumListFilter, extraFieldsField, locatorField, op, returnAllFields } from './shared';
 import { standardDescription } from './standard';
 
 const dataFields: INodeProperties[] = [
 	enumField('Completion Reason', 'completionReason', WORKFLOW_COMPLETION_REASONS),
 	customFieldsField,
+	attachmentsField('Note Attachments', 'noteAttachments', 'note'),
 	extraFieldsField,
 	locatorField({
 		displayName: 'Manager',

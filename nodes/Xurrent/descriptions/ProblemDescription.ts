@@ -1,7 +1,7 @@
 import type { INodeProperties } from 'n8n-workflow';
 
 import { IMPACTS, PROBLEM_CATEGORIES, PROBLEM_STATUSES } from '../constants';
-import { customFieldsField, dateFilters, enumField, enumListFilter, extraFieldsField, locatorField } from './shared';
+import { attachmentsField, customFieldsField, dateFilters, enumField, enumListFilter, extraFieldsField, locatorField } from './shared';
 import { standardDescription } from './standard';
 
 const dataFields: INodeProperties[] = [
@@ -20,6 +20,7 @@ const dataFields: INodeProperties[] = [
 		description: 'Whether the linked requests are completed when the problem is solved',
 	},
 	customFieldsField,
+	attachmentsField('Note Attachments', 'noteAttachments', 'note'),
 	{
 		displayName: 'Customer Resolution',
 		name: 'customerResolution',

@@ -295,13 +295,57 @@ export function parseCustomFields(
 }
 
 /**
+ * Attachment references `[{ key, filesize }]` for notes and `*_attachments` fields. Accepts the output
+ * of Attachment → Upload (an object or a list of them), the same as JSON, or comma-separated keys.
+ * Without `filesize` Xurrent stores the attachment with size 0.
+ */
+export function parseAttachments(this: IExecuteFunctions, value: unknown, itemIndex: number): IDataObject[] {
+	if (value === undefined || value === null || value === '') return [];
+	if (Array.isArray(value)) return value.flatMap((entry) => parseAttachments.call(this, entry, itemIndex));
+	if (typeof value === 'string') {
+		const text = value.trim();
+		if (text.startsWith('{') || text.startsWith('[')) {
+			let parsed: unknown;
+			try {
+				parsed = JSON.parse(text);
+			} catch {
+				throw new NodeOperationError(this.getNode(), '"Attachments" contains invalid JSON', { itemIndex });
+			}
+			return parseAttachments.call(this, parsed, itemIndex);
+		}
+		return text
+			.split(',')
+			.map((key) => key.trim())
+			.filter(Boolean)
+			.map((key) => ({ key }));
+	}
+	if (typeof value === 'object' && (value as IDataObject).key) {
+		const attachment = value as IDataObject;
+		const filesize = Number(attachment.filesize ?? attachment.size);
+		return [
+			compact({
+				key: String(attachment.key),
+				filesize: Number.isFinite(filesize) && filesize > 0 ? filesize : undefined,
+				inline: attachment.inline === true ? true : undefined,
+			}),
+		];
+	}
+	throw new NodeOperationError(
+		this.getNode(),
+		'"Attachments" must be the output of Attachment → Upload, a list of those, or comma-separated keys',
+		{ itemIndex },
+	);
+}
+
+/**
  * How a node field is written to the API:
  * - `plain`: passed through under the API name
  * - `reference`: a resource locator, sent as `<name>_id`
  * - `references`: a comma-separated id list, sent as `<name>_ids`
  * - `timestamp`: a date, converted with toXurrentTimestamp
+ * - `attachments`: uploaded files, converted with parseAttachments
  */
-export type FieldKind = 'plain' | 'reference' | 'references' | 'timestamp';
+export type FieldKind = 'plain' | 'reference' | 'references' | 'timestamp' | 'attachments';
 export type FieldMap = Record<string, { api: string; kind: FieldKind }>;
 
 export function buildBody(this: IExecuteFunctions, map: FieldMap, fields: IDataObject, itemIndex: number): IDataObject {
@@ -319,6 +363,9 @@ export function buildBody(this: IExecuteFunctions, map: FieldMap, fields: IDataO
 			if (ids.length) body[`${field.api}_ids`] = ids;
 		} else if (field.kind === 'timestamp') {
 			body[field.api] = toXurrentTimestamp(value);
+		} else if (field.kind === 'attachments') {
+			const attachments = parseAttachments.call(this, value, itemIndex);
+			if (attachments.length) body[field.api] = attachments;
 		}
 	}
 	const customFields = parseCustomFields.call(this, fields.customFields, itemIndex);

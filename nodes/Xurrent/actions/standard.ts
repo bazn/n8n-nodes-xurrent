@@ -10,6 +10,7 @@ import {
 	type FieldMap,
 	type FilterMap,
 	listOptionsQuery,
+	parseAttachments,
 	requireRecordId,
 	xurrentApiRequest,
 	xurrentApiRequestAllItems,
@@ -28,16 +29,17 @@ export interface StandardRuntime {
 }
 
 /** Note body for POST …/notes. */
-export function buildNoteBody(text: string, options: IDataObject): IDataObject {
-	const keys = String(options.attachmentKeys ?? '')
-		.split(',')
-		.map((key) => key.trim())
-		.filter(Boolean);
+export function buildNoteBody(
+	this: IExecuteFunctions,
+	text: string,
+	options: IDataObject,
+	itemIndex: number,
+): IDataObject {
 	return compact({
 		text,
 		internal: options.internal === true ? true : undefined,
 		suppress_note_added_notifications: options.suppressNotifications === true ? true : undefined,
-		attachments: keys.map((key) => ({ key })),
+		attachments: parseAttachments.call(this, options.attachmentKeys, itemIndex),
 	});
 }
 
@@ -104,9 +106,11 @@ export async function executeStandard(
 		}
 
 		case 'addNote': {
-			const body = buildNoteBody(
+			const body = buildNoteBody.call(
+				this,
 				this.getNodeParameter('noteText', itemIndex) as string,
 				this.getNodeParameter('noteOptions', itemIndex, {}) as IDataObject,
+				itemIndex,
 			);
 			return (await write.call(this, 'POST', `${recordPath}/notes`, body)) as IDataObject;
 		}

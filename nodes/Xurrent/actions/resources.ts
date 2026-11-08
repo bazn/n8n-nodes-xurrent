@@ -18,6 +18,7 @@ const plain = (api: string) => ({ api, kind: 'plain' as FieldKind });
 const ref = (api: string) => ({ api, kind: 'reference' as FieldKind });
 const refs = (api: string) => ({ api, kind: 'references' as FieldKind });
 const time = (api: string) => ({ api, kind: 'timestamp' as FieldKind });
+const files = (api: string) => ({ api, kind: 'attachments' as FieldKind });
 
 const eq = (api: string) => ({ api, kind: 'equals' as FilterKind });
 const list = (api: string) => ({ api, kind: 'list' as FilterKind });
@@ -45,12 +46,14 @@ export const REQUEST: StandardRuntime = {
 		category: plain('category'),
 		requestedFor: ref('requested_for'),
 		note: plain('note'),
+		noteAttachments: files('note_attachments'),
 		ci: ref('ci'),
 		closureCode: plain('closure_code'),
 		completionReason: plain('completion_reason'),
 		desiredCompletionAt: time('desired_completion_at'),
 		impact: plain('impact'),
 		internalNote: plain('internal_note'),
+		internalNoteAttachments: files('internal_note_attachments'),
 		knowledgeArticle: ref('knowledge_article'),
 		majorIncidentStatus: plain('major_incident_status'),
 		member: ref('member'),
@@ -109,6 +112,7 @@ export const PROBLEM: StandardRuntime = {
 		knownError: plain('known_error'),
 		member: ref('member'),
 		note: plain('note'),
+		noteAttachments: files('note_attachments'),
 		plannedEffort: plain('planned_effort'),
 		resolution: plain('resolution'),
 		status: plain('status'),
@@ -145,6 +149,7 @@ export const WORKFLOW: StandardRuntime = {
 		completionReason: plain('completion_reason'),
 		manager: ref('manager'),
 		note: plain('note'),
+		noteAttachments: files('note_attachments'),
 		preventRequestCompletion: plain('prevent_request_completion'),
 		project: ref('project'),
 		release: ref('release'),
@@ -179,6 +184,7 @@ export const TASK: StandardRuntime = {
 		instructions: plain('instructions'),
 		member: ref('member'),
 		note: plain('note'),
+		noteAttachments: files('note_attachments'),
 		plannedEffort: plain('planned_effort'),
 		predecessors: refs('predecessor'),
 		requiredApprovals: plain('required_approvals'),

@@ -1,7 +1,7 @@
 import type { INodeProperties } from 'n8n-workflow';
 
 import { IMPACTS, TASK_CATEGORIES, TASK_STATUSES } from '../constants';
-import { customFieldsField, dateFilters, enumField, enumListFilter, extraFieldsField, locatorField, op, returnAllFields } from './shared';
+import { attachmentsField, customFieldsField, dateFilters, enumField, enumListFilter, extraFieldsField, locatorField, op, returnAllFields } from './shared';
 import { standardDescription } from './standard';
 
 const dataFields: INodeProperties[] = [
@@ -19,6 +19,7 @@ const dataFields: INodeProperties[] = [
 		default: false,
 	},
 	customFieldsField,
+	attachmentsField('Note Attachments', 'noteAttachments', 'note'),
 	extraFieldsField,
 	enumField('Impact', 'impact', IMPACTS),
 	{

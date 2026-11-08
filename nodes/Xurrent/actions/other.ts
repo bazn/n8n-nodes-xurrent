@@ -113,6 +113,12 @@ export function extractUploadKey(response: unknown, fallbackKey?: string, fileNa
 	return fallbackKey && fileName ? fallbackKey.replace('${filename}', fileName) : undefined;
 }
 
+/** Lower-case extension of a file name without the dot, or '' if it has none. */
+export function fileExtension(fileName: string): string {
+	const dot = fileName.lastIndexOf('.');
+	return dot > 0 && dot < fileName.length - 1 ? fileName.slice(dot + 1).toLowerCase() : '';
+}
+
 /**
  * Uploads a binary to the attachment storage: get the storage details, POST the file as
  * multipart/form-data (Content-Type first, then the provider parameters, then the file) and
@@ -134,6 +140,21 @@ async function uploadAttachment(this: IExecuteFunctions, itemIndex: number): Pro
 		{}) as IDataObject;
 	if (!uploadUri) {
 		throw new NodeOperationError(this.getNode(), 'Xurrent did not return an upload URI for attachments', { itemIndex });
+	}
+	// S3 accepts any file, but Xurrent silently drops attachments with an extension the account does not allow
+	const allowedExtensions = (storage.allowed_extensions ?? storage.allowedExtensions ?? []) as string[];
+	const extension = fileExtension(fileName);
+	if (allowedExtensions.length && !allowedExtensions.map((allowed) => allowed.toLowerCase()).includes(extension)) {
+		throw new NodeOperationError(
+			this.getNode(),
+			extension
+				? `Xurrent does not accept files with the extension ".${extension}" ("${fileName}")`
+				: `Xurrent does not accept files without an extension ("${fileName}")`,
+			{
+				itemIndex,
+				description: `Allowed extensions in this account: ${allowedExtensions.join(', ')}. The account owner can change them in Settings → Account Settings (Security), or rename or convert the file before uploading.`,
+			},
+		);
 	}
 	const sizeLimit = Number(storage.size_limit ?? storage.sizeLimit ?? 0);
 	if (sizeLimit && buffer.length > sizeLimit) {

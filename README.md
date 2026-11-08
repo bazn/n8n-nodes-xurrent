@@ -81,7 +81,7 @@ Choose the method under **Authentication** on the node.
 
 **Custom fields** of UI extensions are set with *Custom Fields (JSON)*, either as `[{"id": "field", "value": "…"}]` or as `{"field": "…"}`. Any other API field can be sent with *Extra Fields (JSON)*.
 
-**Attachments in notes:** upload the file with *Attachment → Upload*, then use *Add Note* with *Attachment Keys* = `{{ $json.key }}`.
+**Attachments in notes:** upload the file with *Attachment → Upload*, then pass its output to *Add Note → Note Options → Attachments* = `{{ $json }}` (or a list of uploads). Create and Update offer the same as *Note Attachments*, and requests also as *Internal Note Attachments*. The upload output carries the file size, so Xurrent shows the correct size. Xurrent only keeps files whose extension is allowed in the account (*Settings → Account Settings*, Security); the upload fails with a clear error for other extensions instead of the attachment silently disappearing.
 
 ## Xurrent Trigger
 
